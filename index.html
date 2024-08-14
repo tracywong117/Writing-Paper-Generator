@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,21 +12,25 @@
             margin: 0 auto;
             padding: 20px;
         }
+
         .controls {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
         }
-        .controls > div {
+
+        .controls>div {
             flex: 1;
             min-width: 200px;
         }
+
         canvas {
             border: 1px solid #ccc;
             max-width: 100%;
             height: auto;
         }
+
         button {
             margin-top: 10px;
             padding: 10px;
@@ -34,21 +39,39 @@
             border: none;
             cursor: pointer;
         }
+
         button:hover {
             background-color: #45a049;
         }
-        #redLinePadding, #headerHeight {
+
+        #redLinePadding,
+        #headerHeight {
             width: 50px;
         }
+
         .color-picker {
             display: flex;
             align-items: center;
         }
+
         .color-picker input[type="color"] {
             margin-left: 10px;
         }
+
+        /* Previous styles remain the same */
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+        }
     </style>
 </head>
+
 <body>
     <h1>Writing Paper Generator</h1>
     <div class="controls">
@@ -116,6 +139,19 @@
             <label for="headerHeight">Header Height (mm):</label>
             <input type="number" id="headerHeight" min="0" max="50" value="20">
         </div>
+        <div class="checkbox-group">
+            <label><input type="checkbox" id="titleSection"> Title Section</label>
+            <label><input type="checkbox" id="noField"> No. Field</label>
+            <label><input type="checkbox" id="dateField"> Date Field</label>
+        </div>
+        <div>
+            <label for="footer">Footer</label>
+            <input type="checkbox" id="footer">
+        </div>
+        <div>
+            <label for="footerStart">Footer start on last n line:</label>
+            <input type="number" id="footerStart" min="1" max="5" value="1">
+        </div>
     </div>
     <canvas id="paperCanvas"></canvas>
     <br>
@@ -141,7 +177,6 @@
             'B6': 12,
             'A6': 10
         };
-
         function drawPaper() {
             const paperType = document.getElementById('paperType').value;
             const spacing = parseInt(document.getElementById('spacing').value);
@@ -151,6 +186,11 @@
             const redLine = document.getElementById('redLine').checked;
             const redLinePadding = parseInt(document.getElementById('redLinePadding').value);
             const headerHeight = parseInt(document.getElementById('headerHeight').value);
+            const titleSection = document.getElementById('titleSection').checked;
+            const noField = document.getElementById('noField').checked;
+            const dateField = document.getElementById('dateField').checked;
+            const footer = document.getElementById('footer').checked;
+            const footerStart = parseInt(document.getElementById('footerStart').value);
 
             const [width, height] = pageSizes[pageSize];
             canvas.width = width * 3.78;
@@ -199,29 +239,114 @@
             };
 
             const drawLines = (size) => {
-                const headerPixels = headerHeight * 3.78;
-                
-                // Draw header line
-                ctx.beginPath();
-                ctx.moveTo(0, headerPixels);
-                ctx.lineTo(canvas.width, headerPixels);
-                ctx.stroke();
+                let headerEnd = headerHeight * 3.78; // Header ends here
+                let currentY = headerEnd; // Start drawing from the end of the header
+                const titleSectionHeight = titleSection ? 20 * 3.78 : 0; // 20mm for title section
+
+                // Draw title section
+                if (titleSection) {
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = lineColor;
+
+                    // Top line of title section
+                    ctx.beginPath();
+                    ctx.moveTo(0, currentY);
+                    ctx.lineTo(canvas.width, currentY);
+                    ctx.stroke();
+
+                    currentY += 10 * 3.78; // 10mm space for title
+
+                    // Bottom line of title section
+                    ctx.beginPath();
+                    ctx.moveTo(0, currentY);
+                    ctx.lineTo(canvas.width, currentY);
+                    ctx.stroke();
+
+                    ctx.lineWidth = 0.5;
+                    currentY += spacing * 3.78; // 10mm space after title section
+                }
+
+                // Draw No. and Date fields
+                if (noField || dateField) {
+                    ctx.font = '10px Arial';
+                    ctx.fillStyle = lineColor;
+                    let fieldY = headerEnd - 10 * 3.78; // Position fields 10mm above the title section line
+
+                    if (noField) {
+                        ctx.fillText('No:', canvas.width - 50 * 3.78, fieldY);
+                        ctx.save();
+                        ctx.setLineDash([2, 2]); // Create dotted line
+                        ctx.beginPath();
+                        ctx.moveTo(canvas.width - 40 * 3.78, fieldY + 2);
+                        ctx.lineTo(canvas.width - 5 * 3.78, fieldY + 2);
+                        ctx.stroke();
+                        ctx.restore();
+                    }
+
+                    if (dateField) {
+                        fieldY += 6 * 3.78;
+                        ctx.fillText('Date:', canvas.width - 50 * 3.78, fieldY);
+                        for (let i = 0; i < 2; i++) {
+                            const x = canvas.width - (40 - (i + 1) * 35 / 3) * 3.78;
+                            ctx.fillText('.', x, fieldY);
+                        }
+                    }
+
+                }
+
+                // // Draw horizontal lines
+                // for (let y = currentY; y <= canvas.height; y += size) {
+                //     ctx.beginPath();
+                //     ctx.moveTo(0, y);
+                //     ctx.lineTo(canvas.width, y);
+                //     ctx.stroke();
+                // }
+
+                // if (redLine) {
+                //     ctx.strokeStyle = 'red';
+                //     ctx.beginPath();
+                //     ctx.moveTo(redLinePadding * 3.78, currentY);
+                //     ctx.lineTo(redLinePadding * 3.78, canvas.height);
+                //     ctx.stroke();
+                // }
+
+                // Calculate total number of lines
+                const totalLines = Math.floor((canvas.height - currentY) / size) + 1;
+
+                // Calculate which line should be the footer
+                const footerLineIndex = footer ? totalLines - footerStart : totalLines;
 
                 // Draw horizontal lines
-                for (let y = headerPixels + size; y <= canvas.height; y += size) {
-                    ctx.beginPath();
-                    ctx.moveTo(0, y);
-                    ctx.lineTo(canvas.width, y);
-                    ctx.stroke();
+                for (let i = 0; i < totalLines; i++) {
+                    const y = currentY + i * size;
+
+                    if (i < footerLineIndex) {
+                        // Regular lines
+                        ctx.lineWidth = 0.5;
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(canvas.width, y);
+                        ctx.stroke();
+                    } else if (i === footerLineIndex && footer) {
+                        // Footer line
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(0, y);
+                        ctx.lineTo(canvas.width, y);
+                        ctx.stroke();
+                    }
+                    // Lines after the footer line are not drawn
                 }
 
                 if (redLine) {
                     ctx.strokeStyle = 'red';
+                    ctx.lineWidth = 0.5;
                     ctx.beginPath();
-                    ctx.moveTo(redLinePadding * 3.78, 0);
-                    ctx.lineTo(redLinePadding * 3.78, canvas.height);
+                    ctx.moveTo(redLinePadding * 3.78, currentY - spacing * 3.78);
+                    ctx.lineTo(redLinePadding * 3.78, currentY + footerLineIndex * size);
                     ctx.stroke();
                 }
+
             };
 
             const size = spacing * 3.78;
@@ -238,10 +363,23 @@
                     break;
             }
         }
-
+        
         function generatePDF() {
             const { jsPDF } = window.jspdf;
+            const paperType = document.getElementById('paperType').value;
+            const spacing = parseInt(document.getElementById('spacing').value);
+            const bgColorSelect = document.getElementById('bgColor');
+            const lineColorSelect = document.getElementById('lineColor');
             const pageSize = document.getElementById('pageSize').value;
+            const redLine = document.getElementById('redLine').checked;
+            const redLinePadding = parseInt(document.getElementById('redLinePadding').value);
+            const headerHeight = parseInt(document.getElementById('headerHeight').value);
+            const titleSection = document.getElementById('titleSection').checked;
+            const noField = document.getElementById('noField').checked;
+            const dateField = document.getElementById('dateField').checked;
+            const footer = document.getElementById('footer').checked;
+            const footerStart = parseInt(document.getElementById('footerStart').value);
+
             const [width, height] = pageSizes[pageSize];
             const pdf = new jsPDF({
                 orientation: width > height ? 'l' : 'p',
@@ -249,7 +387,121 @@
                 format: pageSize
             });
 
-            pdf.addImage(canvas.toDataURL('image/jpeg', 1.0), 'JPEG', 0, 0, width, height);
+            // Set background color
+            let bgColor = bgColorSelect.value;
+            if (bgColor === 'custom') {
+                bgColor = document.getElementById('customBgColor').value;
+            }
+            pdf.setFillColor(bgColor);
+            pdf.rect(0, 0, width, height, 'F');
+
+            // Set line color
+            let lineColor = lineColorSelect.value;
+            if (lineColor === 'custom') {
+                lineColor = document.getElementById('customLineColor').value;
+            }
+            pdf.setDrawColor(lineColor);
+            pdf.setLineWidth(0.1);
+
+            const drawLines = () => {
+                let currentY = headerHeight;
+                const titleSectionHeight = titleSection ? 20 : 0;
+
+                // Draw title section
+                if (titleSection) {
+                    pdf.setLineWidth(0.2);
+                    pdf.line(0, currentY, width, currentY);
+                    currentY += 10;
+                    pdf.line(0, currentY, width, currentY);
+                    pdf.setLineWidth(0.1);
+                    currentY += spacing;
+                }
+
+                // Draw No. and Date fields
+                if (noField || dateField) {
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(lineColor);
+                    let fieldY = headerHeight - 10;
+
+                    if (noField) {
+                        pdf.text('No:', width - 50, fieldY);
+                        pdf.setLineDash([0.5, 0.5]);
+                        pdf.line(width - 40, fieldY + 1, width - 5, fieldY + 1);
+                        pdf.setLineDash([]);
+                    }
+
+                    if (dateField) {
+                        fieldY += 6;
+                        pdf.text('Date:', width - 50, fieldY);
+                        for (let i = 0; i < 2; i++) {
+                            const x = width - (40 - (i + 1) * 35 / 3);
+                            pdf.text('.', x, fieldY);
+                        }
+                    }
+                }
+
+                // Calculate total number of lines
+                const totalLines = Math.floor((height - currentY) / spacing) + 1;
+
+                // Calculate which line should be the footer
+                const footerLineIndex = footer ? totalLines - footerStart : totalLines;
+
+                // Draw horizontal lines
+                for (let i = 0; i < totalLines; i++) {
+                    const y = currentY + i * spacing;
+
+                    if (i < footerLineIndex) {
+                        // Regular lines
+                        pdf.setLineWidth(0.1);
+                        pdf.line(0, y, width, y);
+                    } else if (i === footerLineIndex && footer) {
+                        // Footer line
+                        pdf.setLineWidth(0.2);
+                        pdf.line(0, y, width, y);
+                    }
+                    // Lines after the footer line are not drawn
+                }
+
+                if (redLine) {
+                    pdf.setDrawColor('red');
+                    pdf.setLineWidth(0.1);
+                    pdf.line(redLinePadding, currentY - spacing, redLinePadding, currentY + footerLineIndex * spacing);
+                    pdf.setDrawColor(lineColor);
+                }
+            };
+
+            const drawGrid = () => {
+                // Draw vertical lines
+                for (let x = 0; x <= width; x += spacing) {
+                    pdf.line(x, 0, x, height);
+                }
+                // Draw horizontal lines
+                for (let y = 0; y <= height; y += spacing) {
+                    pdf.line(0, y, width, y);
+                }
+            };
+
+            const drawDots = () => {
+                pdf.setFillColor(lineColor);
+                for (let x = spacing; x < width; x += spacing) {
+                    for (let y = spacing; y < height; y += spacing) {
+                        pdf.circle(x, y, 0.2, 'F');
+                    }
+                }
+            };
+
+            switch (paperType) {
+                case 'grid':
+                    drawGrid();
+                    break;
+                case 'dot':
+                    drawDots();
+                    break;
+                case 'line':
+                    drawLines();
+                    break;
+            }
+
             pdf.save('writing_paper.pdf');
         }
 
@@ -280,16 +532,26 @@
             document.getElementById('redLinePadding').value = defaultRedLinePadding[pageSize];
         }
 
-        function updateHeaderHeightVisibility() {
+        function updateByPaperType() {
             const paperType = document.getElementById('paperType').value;
             const headerHeightContainer = document.getElementById('headerHeight').parentNode;
             headerHeightContainer.style.display = paperType === 'line' ? 'block' : 'none';
 
             const redLineCheckbox = document.getElementById('redLine').parentNode;
             redLineCheckbox.style.display = paperType === 'line' ? 'block' : 'none';
-            
+
             const redLineContainer = document.getElementById('redLinePadding').parentNode;
             redLineContainer.style.display = paperType === 'line' ? 'block' : 'none';
+
+            const lineTypeOptions = document.querySelectorAll('.checkbox-group')[0];
+            lineTypeOptions.style.display = paperType === 'line' ? 'flex' : 'none';
+
+            const footerCheckbox = document.getElementById('footer').parentNode;
+            footerCheckbox.style.display = paperType === 'line' ? 'block' : 'none';
+
+            const footerOptions = document.getElementById('footerStart').parentNode;
+            footerOptions.style.display = paperType === 'line' ? 'block' : 'none';
+
 
         }
 
@@ -307,7 +569,7 @@
         // Update spacing options and header height visibility when paper type changes
         document.getElementById('paperType').addEventListener('change', () => {
             updateSpacingOptions();
-            updateHeaderHeightVisibility();
+            updateByPaperType();
             drawPaper();
         });
 
@@ -324,10 +586,11 @@
         // Initial setup
         updateSpacingOptions();
         updateRedLinePadding();
-        updateHeaderHeightVisibility();
+        updateByPaperType();
         updateColorPickerVisibility('bgColor', 'customBgColor');
         updateColorPickerVisibility('lineColor', 'customLineColor');
         drawPaper();
     </script>
 </body>
+
 </html>
