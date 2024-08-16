@@ -31,17 +31,8 @@
             flex: 1;
             padding: 20px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .main-header {
-            display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%;
-            margin-bottom: 20px;
         }
 
         h1 {
@@ -49,11 +40,6 @@
             color: #ecf0f1;
             margin-bottom: 30px;
             font-size: 24px;
-        }
-
-        .main-content h1 {
-            color: #2c3e50;
-            margin: 0;
         }
 
         .control-section {
@@ -133,105 +119,18 @@
             cursor: pointer;
             font-size: 16px;
             transition: background-color 0.3s ease;
-            z-index: 10000;
         }
 
         button:hover {
             background-color: #a8a0ea;
-        }
-
-        #sidebarToggle {
-            display: none;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 0%;
-                position: fixed;
-                top: 0;
-                left: -100%;
-                bottom: 0;
-                transition: left 0.3s ease;
-                z-index: 1000;
-                scrollbar-width: none;
-            }
-
-            .sidebar::-webkit-scrollbar {
-                display: none;
-            }
-
-            .sidebar .control-section {
-                display: none;
-            }
-
-            .sidebar.open .control-section {
-                display: block;
-            }
-
-            .sidebar .sidebar-title {
-                display: none;
-            }
-
-            .sidebar.open {
-                width: 80%;
-                left: 0;
-            }
-
-            .main-content {
-                padding-top: 20px;
-            }
-
-            .main-header {
-                /* position: fixed; */
-                top: 0;
-                left: 0;
-                right: 0;
-                background-color: #f0f0f0;
-                padding: 10px 20px;
-                z-index: 999;
-            }
-
-            #sidebarToggle {
-                display: block;
-                background: none;
-                border: none;
-                cursor: pointer;
-                padding: 0;
-                width: 40px;
-                height: 40px;
-            }
-
-            .main-content h1 {
-                flex-grow: 1;
-            }
-
-            .sidebar h1 {
-                position: static;
-                color: #ecf0f1;
-                background-color: transparent;
-            }
-
-            canvas {
-                margin-top: 60px;
-            }
-        }
-
-        @media (min-width: 769px) {
-            .main-header {
-                display: none;
-            }
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <div class="sidebar" id="sidebar">
-            <h1 class="sidebar-title">Writing Paper Generator</h1>
+        <div class="sidebar">
+            <h1>Writing Paper Generator</h1>
             <div class="control-section">
                 <h2>General Settings</h2>
                 <div class="control-group">
@@ -336,36 +235,12 @@
             <button onclick="generatePDF()">Generate PDF</button>
         </div>
         <div class="main-content">
-            <div class="main-header">
-                <button id="sidebarToggle">
-                    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="20" cy="20" r="20" fill="#2c3e50" />
-                        <path d="M13 20H27M13 14H27M13 26H27" stroke="white" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                </button>
-                <h1>Writing Paper Generator</h1>
-            </div>
             <canvas id="paperCanvas"></canvas>
         </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-        });
-
-        // Close sidebar when clicking outside of it (mobile only)
-        document.addEventListener('click', (event) => {
-            if (window.innerWidth <= 768 && !sidebar.contains(event.target) && !sidebarToggle.contains(event.target) && sidebar.classList.contains('open')) {
-                sidebar.classList.remove('open');
-            }
-        });
-
         const canvas = document.getElementById('paperCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -881,7 +756,6 @@
         updateColorPickerVisibility('bgColor', 'customBgColor');
         updateColorPickerVisibility('lineColor', 'customLineColor');
         drawPaper();
-
     </script>
 </body>
 
