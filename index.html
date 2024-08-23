@@ -266,10 +266,10 @@
                         <option value="A6">A6</option>
                     </select>
                 </div>
-                <div class="control-group">
+                <!-- <div class="control-group">
                     <label for="padding">Padding (mm):</label>
                     <input type="number" id="padding" min="0" max="50" value="0">
-                </div>
+                </div> -->
             </div>
             <div class="control-section">
                 <h2>Color Settings</h2>
@@ -424,7 +424,7 @@
             const dateField = document.getElementById('dateField').checked;
             const footer = document.getElementById('footer').checked;
             const footerStart = parseInt(document.getElementById('footerStart').value);
-            const padding = parseInt(document.getElementById('padding').value);
+            // const padding = parseInt(document.getElementById('padding').value);
             const ruler = document.getElementById('ruler').checked;
 
             const [width, height] = pageSizes[pageSize];
@@ -621,7 +621,7 @@
             const dateField = document.getElementById('dateField').checked;
             const footer = document.getElementById('footer').checked;
             const footerStart = parseInt(document.getElementById('footerStart').value);
-            const padding = parseInt(document.getElementById('padding').value);
+            // const padding = parseInt(document.getElementById('padding').value);
             const ruler = document.getElementById('ruler').checked;
 
             const [width, height] = pageSizes[pageSize];
@@ -819,30 +819,6 @@
             const paperType = document.getElementById('paperType').value;
             const controlSection = document.getElementById('lineOptions');
             controlSection.style.display = paperType === 'line' ? 'block' : 'none';
-
-            // const headerHeightContainer = document.getElementById('headerHeight').parentNode;
-            // headerHeightContainer.style.display = paperType === 'line' ? 'block' : 'none';
-
-            // const redLineCheckbox = document.getElementById('redLine').parentNode;
-            // redLineCheckbox.style.display = paperType === 'line' ? 'block' : 'none';
-
-            // const redLineContainer = document.getElementById('redLinePadding').parentNode;
-            // redLineContainer.style.display = paperType === 'line' ? 'block' : 'none';
-
-            // const lineTypeOptions = document.querySelectorAll('.checkbox-group')[0];
-            // lineTypeOptions.style.display = paperType === 'line' ? 'flex' : 'none';
-
-            // const footerCheckbox = document.getElementById('footer').parentNode;
-            // footerCheckbox.style.display = paperType === 'line' ? 'block' : 'none';
-
-            // const footerOptions = document.getElementById('footerStart').parentNode;
-            // footerOptions.style.display = paperType === 'line' ? 'block' : 'none';
-
-            // const paddingOptions = document.getElementById('padding').parentNode;
-            // paddingOptions.style.display = paperType === 'line' ? 'block' : 'none';
-
-            // const rulerCheckbox = document.getElementById('ruler').parentNode;
-            // rulerCheckbox.style.display = paperType === 'line' ? 'block' : 'none';
 
         }
 
