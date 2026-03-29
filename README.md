@@ -1,6 +1,12 @@
 # Writing Paper 
 
-The Writing Paper Generator is a web-based tool that allows users to create customized writing paper for various purposes such as note-taking, journaling, or academic use. This application offers a wide range of options to tailor the paper to your specific needs, including different paper types, sizes, colors, and additional features.
+The Writing Paper Generator is a web-based tool built with **Vue 3** and **Vite** that allows users to create customized writing paper for various purposes such as note-taking, journaling, or academic use.
+
+## Tech Stack
+- **Framework:** Vue 3 (Composition API)
+- **Build Tool:** Vite
+- **PDF Generation:** jsPDF
+- **Styling:** CSS (Scoped in Vue components)
 
 ## Features
 - Multiple paper types: Empty, Grid, Dot, and Line
@@ -15,3 +21,28 @@ The Writing Paper Generator is a web-based tool that allows users to create cust
   - Footer
   - Ruler
 - PDF generation for easy printing and sharing
+
+## Getting Started
+
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
+
+### Installation
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Development
+To start the development server:
+```bash
+npm run dev
+```
+
+### Build
+To build for production:
+```bash
+npm run build
+```
